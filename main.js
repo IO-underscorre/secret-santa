@@ -104,31 +104,44 @@ function updateCurrentExclusionList(event) {
 
 function generateExchangesTable() {
     const orderedUsers = usersArray.toSorted((user1, user2) => user2.exclusions.length - user1.exclusions.length);
-    const alreadyExtractedRecipients = [];
+    const alreadyExtractedRecipients = new Set();
 
-    const error = orderedUsers.some(user => {
-        const forbiddenUsers = new Set(alreadyExtractedRecipients.concat(user.exclusions, [user]));
+    function shuffleArray(array) {
+        return array.map(value => ({ value, sort: Math.random() })).sort((a, b) => a.sort - b.sort).map(({ value }) => value);
+    }
 
-        const possibleRecipients = usersArray.filter(recipient => !forbiddenUsers.has(recipient));
-
-        if (possibleRecipients.length) {
-            const recipient = possibleRecipients[Math.floor(Math.random() * possibleRecipients.length)];
-
-            alreadyExtractedRecipients.push(recipient);
-            user.updateGiftRecipient(recipient);
-
-            return false;
-        } else {
+    function assignRecipients(index) {
+        if (index === orderedUsers.length) {
             return true;
         }
-    });
 
-    if (error) {
+        const user = orderedUsers[index];
+        const forbiddenUsers = new Set([...alreadyExtractedRecipients, ...user.exclusions, user]);
+
+        const possibleRecipients = shuffleArray(usersArray.filter(recipient => !forbiddenUsers.has(recipient)));
+
+        for (const recipient of possibleRecipients) {
+            user.updateGiftRecipient(recipient);
+            alreadyExtractedRecipients.add(recipient);
+
+            if (assignRecipients(index + 1)) {
+                return true;
+            }
+
+            alreadyExtractedRecipients.delete(recipient);
+            user.updateGiftRecipient(null);
+        }
+
+        return false;
+    }
+
+    if (!assignRecipients(0)) {
         alert('Impossible to generate gift exchanges');
     } else {
         const recipientSpans = document.querySelectorAll('.reciver-name');
         recipientSpans.forEach(span => {
-            span.textContent = findUserFromUserIndexInArray(span.parentElement.dataset.index, usersArray).giftRecipient.name;
+            const user = findUserFromUserIndexInArray(span.parentElement.dataset.index, usersArray);
+            span.textContent = user.giftRecipient.name;
         });
     }
 }
