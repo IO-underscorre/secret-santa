@@ -9,6 +9,10 @@ class User {
     }
 
     updateExclusions(user) {
+        if (!(user instanceof User)) {
+            throw new Error('Invalid user');
+        }
+
         const index = this.exclusions.indexOf(user);
 
         if (index !== -1) {
