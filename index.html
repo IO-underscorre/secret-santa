@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="style.css">
+
+    <title>Secret Santa Extractor</title>
+</head>
+
+<body>
+    <div id="page-wrapper">
+        <div>
+            <main>
+                <h1>
+                    Secret Santa
+                </h1>
+
+                <form id="new-user" class="user">
+                    <input type="text" min="3" id="new-user-input" required class="name"
+                           placeholder="Add a new user">
+
+                    <menu class="user-options">
+                        <li>
+                            <button>&#10149;</button>
+                        </li>
+                    </menu>
+                </form>
+
+                <ul id="users-list"></ul>
+            </main>
+        </div>
+    </div>
+
+    <script src="./main.js"></script>
+</body>
+
+</html>
