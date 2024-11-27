@@ -58,7 +58,7 @@ function writeUserInList(index, name, listElement) {
         const generateTableButton = document.createElement('button');
         generateTableButton.id = 'generate-table-button';
         generateTableButton.textContent = 'Generate Gift Exchanges';
-        generateTableButton.addEventListener('click', event => generateExchangesTable());
+        generateTableButton.addEventListener('click', event => debounce(generateExchangesTable, 500));
         document.querySelector('main').appendChild(generateTableButton);
     }
 }
@@ -135,6 +135,14 @@ function generateExchangesTable() {
 
 function findUserFromUserIndexInArray(indexToFind, array) {
     return array.find(user => user.index == indexToFind);
+}
+
+function debounce(func, delay) {
+    let timeout;
+    return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), delay);
+    };
 }
 
 
