@@ -1,6 +1,7 @@
 // Classes
 class User {
     exclusions = [];
+    giftRecipient = {};
 
     constructor(index, name) {
         this.index = index;
@@ -16,6 +17,10 @@ class User {
             this.exclusions.push(user);
         }
     }
+
+    updateGiftRecipient(user) {
+        this.giftRecipient = user;
+    }
 }
 
 
@@ -27,13 +32,16 @@ function writeUserInList(index, name, listElement) {
     userElement.innerHTML = `
                         <input type="checkbox" disabled title="Add to Current Exclusion List">
 
-                        <span class="name">
+                        <span class="sender-name">
                             ${name}
+                        </span>
+
+                        <span class="reciver-name">
                         </span>
 
                         <menu class="user-options">
                             <li>
-                                <button class="edit-exclusion" title="Edit Exclusion List">&#9998;</button>
+                                <button class="edit-exclusion" title="Edit Allowed Reciver List">&#9998;</button>
                             </li>
 
                             <li>
@@ -45,6 +53,14 @@ function writeUserInList(index, name, listElement) {
     userElement.querySelector('.delete-user').addEventListener('click', event => deleteUser(userElement));
     userElement.querySelector('input[type="checkbox"]').addEventListener('change', event => updateCurrentExclusionList(event));
     listElement.append(userElement);
+
+    if (!document.querySelector('#generate-table-button')) {
+        const generateTableButton = document.createElement('button');
+        generateTableButton.id = 'generate-table-button';
+        generateTableButton.textContent = 'Generate Gift Exchanges';
+        generateTableButton.addEventListener('click', event => generateExchangesTable());
+        document.querySelector('main').appendChild(generateTableButton);
+    }
 }
 
 function switchExclusionMode(event, userElem, isStartingExclusionMode) {
@@ -53,7 +69,7 @@ function switchExclusionMode(event, userElem, isStartingExclusionMode) {
 
     if (isStartingExclusionMode) {
         exclusionModeCurrentIndex = userElem.dataset.index;
-        const exclusionModeCurrentUser = findUserFromIncexInArray(exclusionModeCurrentIndex, usersArray);
+        const exclusionModeCurrentUser = findUserFromUserIndexInArray(exclusionModeCurrentIndex, usersArray);
 
         event.target.innerHTML = `&#10004;`;
 
@@ -81,12 +97,43 @@ function deleteUser(userElem) {
 }
 
 function updateCurrentExclusionList(event) {
-    const exclusionModeCurrentUser = findUserFromIncexInArray(exclusionModeCurrentIndex, usersArray);
+    const exclusionModeCurrentUser = findUserFromUserIndexInArray(exclusionModeCurrentIndex, usersArray);
 
-    exclusionModeCurrentUser.updateExclusions(findUserFromIncexInArray(event.target.parentElement.dataset.index, usersArray));
+    exclusionModeCurrentUser.updateExclusions(findUserFromUserIndexInArray(event.target.parentElement.dataset.index, usersArray));
 }
 
-function findUserFromIncexInArray(indexToFind, array) {
+function generateExchangesTable() {
+    const orderedUsers = usersArray.toSorted((user1, user2) => user2.exclusions.length - user1.exclusions.length);
+    const alreadyExtractedRecipients = [];
+
+    const error = orderedUsers.some(user => {
+        const forbiddenUsers = new Set(alreadyExtractedRecipients.concat(user.exclusions, [user]));
+
+        const possibleRecipients = usersArray.filter(recipient => !forbiddenUsers.has(recipient));
+
+        if (possibleRecipients.length) {
+            const recipient = possibleRecipients[Math.floor(Math.random() * possibleRecipients.length)];
+
+            alreadyExtractedRecipients.push(recipient);
+            user.updateGiftRecipient(recipient);
+
+            return false;
+        } else {
+            return true;
+        }
+    });
+
+    if (error) {
+        alert('Impossible to generate gift exchanges');
+    } else {
+        const recipientSpans = document.querySelectorAll('.reciver-name');
+        recipientSpans.forEach(span => {
+            span.textContent = findUserFromUserIndexInArray(span.parentElement.dataset.index, usersArray).giftRecipient.name;
+        });
+    }
+}
+
+function findUserFromUserIndexInArray(indexToFind, array) {
     return array.find(user => user.index == indexToFind);
 }
 

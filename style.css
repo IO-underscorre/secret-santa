@@ -64,7 +64,7 @@ ol {
 
             h1 {
                 color: var(--clr-primary);
-                font-size: 3rem;
+                font-size: 2.25rem;
                 font-weight: 900;
                 text-transform: uppercase;
                 text-align: center;
@@ -73,8 +73,8 @@ ol {
             .user {
                 --sid-button: 1.5rem;
                 --sid-checkbox: .875rem;
-                --gap-s: 1.5rem;
-                --gap-l: 2.5rem;
+                --gap-s: 1rem;
+                --gap-l: 2rem;
 
                 display: flex;
                 align-items: center;
@@ -86,8 +86,8 @@ ol {
                     background-color: color-mix(in oklab, var(--clr-primary) 75%, #00000000 100%);
                 }
 
-                .name {
-                    flex: 1 1;
+                [class$="-name"] {
+                    flex: 1 1 3rem;
                     height: var(--sid-button);
                     font-size: 1rem;
                     font-weight: 600;
@@ -96,7 +96,7 @@ ol {
                     text-wrap: nowrap;
                 }
 
-                input.name {
+                input[class$="-name"] {
                     background-color: transparent;
                     outline: 0;
                     border: 0;
@@ -178,6 +178,35 @@ ol {
                         pointer-events: none;
                         opacity: 0;
                     }
+                }
+            }
+
+            #generate-table-button {
+                margin-top: 1.25rem;
+                width: 100%;
+                padding: .5rem 1rem;
+                font-size: 1.5rem;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: var(--rad-xs);
+                border: 1px solid transparent;
+                color: var(--clr-neutral-lt);
+                background-color: var(--clr-primary);
+                cursor: pointer;
+
+                &:hover {
+                    box-shadow: 0 0 .75rem var(--clr-shadow);
+                }
+
+                &:active {
+                    box-shadow: inset 0 0 .75rem var(--clr-shadow);
+                }
+
+                &:disabled {
+                    pointer-events: none;
+                    filter: grayscale(100%) brightness(150%);
                 }
             }
         }
