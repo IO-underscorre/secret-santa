@@ -87,7 +87,8 @@ function switchExclusionMode(event, userElem, isStartingExclusionMode) {
         checkboxes.forEach(checkbox => checkbox.disabled = true);
     }
 
-    event.target.addEventListener('click', (event) => switchExclusionMode(event, userElem, !isStartingExclusionMode));
+    event.target.removeEventListener('click', switchExclusionMode);
+    event.target.addEventListener('click', event => switchExclusionMode(event, userElem, !isStartingExclusionMode));
 }
 
 function deleteUser(userElem) {
