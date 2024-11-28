@@ -27,8 +27,15 @@ class User {
     }
 }
 
-
 // Functions
+function debounce(func, delay) {
+    let timeout;
+    return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), delay);
+    };
+}
+
 function writeUserInList(index, name, listElement) {
     const userElement = document.createElement('li');
     userElement.classList.add('user');
@@ -58,11 +65,11 @@ function writeUserInList(index, name, listElement) {
     userElement.querySelector('input[type="checkbox"]').addEventListener('change', event => updateCurrentExclusionList(event));
     listElement.append(userElement);
 
-    if (!document.querySelector('#generate-table-button')) {
+    if (usersMap.size > 1 && !document.querySelector('#generate-table-button')) {
         const generateTableButton = document.createElement('button');
         generateTableButton.id = 'generate-table-button';
         generateTableButton.textContent = 'Generate Gift Exchanges';
-        generateTableButton.addEventListener('click', event => debounce(generateExchangesTable, 500));
+        generateTableButton.addEventListener('click', debounce(generateExchangesTable, 250));
         document.querySelector('main').appendChild(generateTableButton);
     }
 }
@@ -72,8 +79,8 @@ function switchExclusionMode(event, userElem, isStartingExclusionMode) {
     const checkboxes = document.querySelectorAll('[type="checkbox"]');
 
     if (isStartingExclusionMode) {
-        exclusionModeCurrentIndex = userElem.dataset.index;
-        const exclusionModeCurrentUser = findUserFromUserIndexInArray(exclusionModeCurrentIndex, usersArray);
+        exclusionModeCurrentIndex = parseInt(userElem.dataset.index);
+        const exclusionModeCurrentUser = usersMap.get(exclusionModeCurrentIndex);
 
         event.target.innerHTML = `&#10004;`;
 
@@ -96,40 +103,48 @@ function switchExclusionMode(event, userElem, isStartingExclusionMode) {
 }
 
 function deleteUser(userElem) {
-    usersArray.splice(usersArray.findIndex(user => user.index == userElem.dataset.index), 1);
+    const userIndex = parseInt(userElem.dataset.index);
+    if (usersMap.has(userIndex)) {
+        usersMap.delete(userIndex);
+    }
 
     userElem.remove();
 }
 
 function updateCurrentExclusionList(event) {
-    const exclusionModeCurrentUser = findUserFromUserIndexInArray(exclusionModeCurrentIndex, usersArray);
+    const exclusionModeCurrentUser = usersMap.get(exclusionModeCurrentIndex);
 
-    exclusionModeCurrentUser.updateExclusions(findUserFromUserIndexInArray(event.target.parentElement.dataset.index, usersArray));
+    exclusionModeCurrentUser.updateExclusions(usersMap.get(parseInt(event.target.parentElement.dataset.index)));
 }
 
 function generateExchangesTable() {
-    const orderedUsers = usersArray.toSorted((user1, user2) => user2.exclusions.length - user1.exclusions.length);
     const alreadyExtractedRecipients = new Set();
 
     function shuffleArray(array) {
-        return array.map(value => ({ value, sort: Math.random() })).sort((a, b) => a.sort - b.sort).map(({ value }) => value);
+        return array.map(value => ({ value, sort: Math.random() }))
+            .sort((a, b) => a.sort - b.sort)
+            .map(({ value }) => value);
     }
 
-    function assignRecipients(index) {
-        if (index === orderedUsers.length) {
+    function assignRecipients(indexes) {
+        if (indexes.length === 0) {
             return true;
         }
 
-        const user = orderedUsers[index];
+        const currentUserIndex = indexes.pop();
+        const user = usersMap.get(currentUserIndex);
+
         const forbiddenUsers = new Set([...alreadyExtractedRecipients, ...user.exclusions, user]);
 
-        const possibleRecipients = shuffleArray(usersArray.filter(recipient => !forbiddenUsers.has(recipient)));
+        const possibleRecipients = shuffleArray(
+            Array.from(usersMap.values()).filter(recipient => !forbiddenUsers.has(recipient))
+        );
 
         for (const recipient of possibleRecipients) {
             user.updateGiftRecipient(recipient);
             alreadyExtractedRecipients.add(recipient);
 
-            if (assignRecipients(index + 1)) {
+            if (assignRecipients(indexes)) {
                 return true;
             }
 
@@ -137,35 +152,30 @@ function generateExchangesTable() {
             user.updateGiftRecipient(null);
         }
 
+        indexes.push(currentUserIndex);
         return false;
     }
 
-    if (!assignRecipients(0)) {
+    const userIndexes = Array.from(usersMap.keys());
+
+    shuffleArray(userIndexes);
+
+    if (!assignRecipients(userIndexes)) {
         alert('Impossible to generate gift exchanges');
     } else {
         const recipientSpans = document.querySelectorAll('.reciver-name');
         recipientSpans.forEach(span => {
-            const user = findUserFromUserIndexInArray(span.parentElement.dataset.index, usersArray);
+            const userIndex = parseInt(span.parentElement.dataset.index, 10);
+            const user = usersMap.get(userIndex);
+
             span.textContent = user.giftRecipient.name;
         });
     }
 }
 
-function findUserFromUserIndexInArray(indexToFind, array) {
-    return array.find(user => user.index == indexToFind);
-}
-
-function debounce(func, delay) {
-    let timeout;
-    return function (...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), delay);
-    };
-}
-
 
 // Main
-const usersArray = [];
+const usersMap = new Map();
 let indexOfNewUser = 0;
 let exclusionModeCurrentIndex = false;
 
@@ -178,7 +188,7 @@ newUserFormElement.addEventListener('submit', (event) => {
 
     indexOfNewUser += 1;
 
-    usersArray.push(new User(indexOfNewUser, newUserInputElement.value));
+    usersMap.set(indexOfNewUser, new User(indexOfNewUser, newUserInputElement.value));
 
     writeUserInList(indexOfNewUser, newUserInputElement.value, usersListElement);
 
