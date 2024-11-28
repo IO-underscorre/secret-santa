@@ -9,7 +9,7 @@
     font-size: 16px;
     font-optical-sizing: auto;
 
-    background-color: #1a4420;
+    background: radial-gradient(color-mix(in lab, var(--clr-secondary) 100%, var(--clr-neutral-lt) 20%), var(--clr-secondary)), var(--clr-secondary);
     color: var(--clr-neutral-dk);
 
     /* Variables */
@@ -42,18 +42,74 @@ ol {
     list-style: none;
 }
 
-#page-wrapper {
+#outer-page-wrapper {
+    position: relative;
     width: 100%;
     height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
 
-    &>div {
+    [class^="background-items"] {
+        position: absolute;
+        pointer-events: none;
+        display: flex;
+        justify-content: space-evenly;
+        width: 100%;
+
+        img {
+            width: 100%;
+        }
+
+        &.background-items-top {
+            top: 0;
+            align-items: start;
+            gap: 2rem;
+
+            &>* {
+                flex-basis: 6rem;
+
+                @media screen and (max-width: 650px) {
+                    &.background-pendant {
+                        display: none;
+                    }
+
+                    &.background-sugar {
+                        display: none;
+                    }
+                }
+
+                @media screen and (max-width: 400px) {
+                    &.background-bell {
+                        display: none;
+                    }
+                }
+            }
+        }
+
+        &.background-items-bottom {
+            bottom: 0;
+            align-items: end;
+            gap: 4rem;
+
+            img {
+                vertical-align: bottom;
+            }
+
+            &>* {
+                flex-basis: 24rem;
+                max-width: 80%;
+            }
+        }
+    }
+
+    #inner-page-wrapper {
         padding: 5rem 0;
         overflow: auto;
 
         main {
+            position: relative;
+            z-index: 501;
             max-width: 60rem;
             width: 90%;
             margin: 0 auto;
