@@ -124,32 +124,36 @@ ol {
                     justify-content: end;
                     gap: var(--gap-s);
                     margin-left: auto;
-                }
 
-                button {
-                    width: var(--sid-button);
-                    height: var(--sid-button);
-                    font-size: 1rem;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    border-radius: var(--rad-xs);
-                    border: 1px solid var(--clr-neutral-dk);
-                    cursor: pointer;
+                    li {
+                        flex-grow: 1;
 
-                    &:hover {
-                        color: var(--clr-neutral-lt);
-                        background-color: var(--clr-neutral-dk);
-                        box-shadow: 0 0 .5rem var(--clr-shadow);
-                    }
+                        button {
+                            width: 100%;
+                            height: var(--sid-button);
+                            font-size: 1rem;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            border-radius: var(--rad-xs);
+                            border: 1px solid var(--clr-neutral-dk);
+                            cursor: pointer;
 
-                    &:active {
-                        box-shadow: none;
-                    }
+                            &:hover {
+                                color: var(--clr-neutral-lt);
+                                background-color: var(--clr-neutral-dk);
+                                box-shadow: 0 0 .5rem var(--clr-shadow);
+                            }
 
-                    &:disabled {
-                        pointer-events: none;
-                        filter: grayscale(100%) brightness(150%);
+                            &:active {
+                                box-shadow: none;
+                            }
+
+                            &:disabled {
+                                pointer-events: none;
+                                filter: grayscale(100%) brightness(150%);
+                            }
+                        }
                     }
                 }
 
